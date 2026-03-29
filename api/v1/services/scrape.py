@@ -1,27 +1,29 @@
 # Aboutme: Scrapes startup urls from different sources
 import re
-from langfuse import observe, propagate_attributes
+from langfuse import observe
 from api.v1.data_access import supabase, firecrawl
 from api.v1.services import extract_and_save_startup_data
 
-# Get chunk of new company data from multiple sources
-@observe(name="scrape_sources")
-def scrape_sources():
-    with propagate_attributes(trace_name="scrape_sources"):
-        urls = []
-        # Scrape YC
-        urls.extend(scrape_yc())
+@observe(name="batch_scrape_companies")
+def batch_scrape_companies():
+    urls = get_new_company_urls()
 
-        # Deduplicate the urls
-        new_urls = dedupe(urls)
+    for url in urls:
+        extract_and_save_startup_data(url)
 
-        for url in new_urls:
-            extract_and_save_startup_data(url)
+def get_new_company_urls() -> list[str]:
+    existing_urls = supabase.get_all_startup_urls()
+    urls = []
 
+    # Scrape sources
+    yc_urls = scrape_yc()
+    urls.extend(yc_urls)
+
+    new_urls = dedupe(urls, existing_urls)
+    return new_urls
 
 # Ensure only new urls are scraped (save firecrawl credits)
-def dedupe(urls: list[str]) -> list[str]:
-    existing_urls = set(supabase.get_all_startup_urls())
+def dedupe(urls: list[str], existing_urls: list[str]) -> list[str]:
     seen = set()
     result = []
     for url in urls:
@@ -31,14 +33,12 @@ def dedupe(urls: list[str]) -> list[str]:
     return result
 
 # Scrape links of YC companies (default is Winter 2026)
-@observe()
 def scrape_yc(batch: str = "Winter%202026") -> list[str]:
-    with propagate_attributes(trace_name="scrape_yc"):
-        url = f"https://www.ycombinator.com/companies?batch={batch}"
+    url = f"https://www.ycombinator.com/companies?batch={batch}"
 
-        markdown = firecrawl.scrape(url)
+    markdown = firecrawl.scrape(url)
 
-        # Extract YC company page URLs from markdown links
-        links = re.findall(r'\[.*?\]\((https://www\.ycombinator\.com/companies/[^)]+)\)', markdown)
+    # Extract YC company page URLs from markdown links
+    links = re.findall(r'\[.*?\]\((https://www\.ycombinator\.com/companies/[^)]+)\)', markdown)
 
-        return links
+    return links
