@@ -1,10 +1,15 @@
-from api.v1.data_access import firecrawl, supabase
+from api.v1.data_access import firecrawl, supabase, openai
 
 def extract_and_save_startup_data(url: str):
-    # Scrape the url using firecrawl 
     markdown = firecrawl.scrape(url)
 
-    # Insert the raw text into supabase
-    supabase.insert_startup_raw_text(url, markdown)
+    data = openai.extract_startup_data(markdown)
+    supabase.insert_startup_data(url, markdown, data)
 
-    return markdown
+    return data
+
+def enrich_startup_data():
+    startups = supabase.get_all_startup_data()
+    for startup in startups:
+        data = openai.extract_startup_data(startup.raw_text)
+        supabase.insert_startup_data(startup.source_url, startup.raw_text, data)
