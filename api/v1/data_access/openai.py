@@ -1,12 +1,13 @@
-from openai import OpenAI
 from dotenv import load_dotenv
 import os
-import instructor
-from api.v1.data_access.supabase import Startup
 
 load_dotenv()
 
-client = instructor.from_openai(OpenAI(api_key=os.getenv("OPENAI_API_KEY")))
+from langfuse.openai import openai
+import instructor
+from api.v1.data_access.supabase import Startup
+
+client = instructor.from_openai(openai.OpenAI(api_key=os.getenv("OPENAI_API_KEY")))
 
 def extract_startup_data(markdown: str) -> Startup:
     return client.chat.completions.create(

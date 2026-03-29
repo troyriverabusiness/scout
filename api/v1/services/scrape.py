@@ -1,9 +1,11 @@
 # Aboutme: Scrapes startup urls from different sources
 import re
+from langfuse import observe
 from api.v1.data_access import supabase, firecrawl
 from api.v1.services import extract_and_save_startup_data
 
 # Get chunk of new company data from multiple sources
+@observe(name="scrape_sources")
 def scrape_sources():
     urls = []
     # Scrape YC

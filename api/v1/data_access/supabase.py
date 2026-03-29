@@ -11,14 +11,18 @@ supabase: Client = create_client(
 )
 
 class Startup(BaseModel):
-    name: str
-    description: str
-    founded: str
-    location: str
-    sector: str
-    stage: str
-    founders: list[str]
-    traction_signals: list[str]
+    id: str | None = None
+    source_url: str | None = None
+    raw_text: str | None = None
+    name: str | None = None
+    description: str | None = None
+    founded: str | None = None
+    location: str | None = None
+    sector: str | None = None
+    stage: str | None = None
+    founders: list[str] | None = None
+    traction_signals: list[str] | None = None
+    created_at: str | None = None
 
 # ===============================
 # Queries
