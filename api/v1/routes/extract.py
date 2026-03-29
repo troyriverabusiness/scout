@@ -1,4 +1,4 @@
-from api.v1.services import extract_and_save_startup_data
+from api.v1.services import extract_and_save_startup_data, scrape_sources
 from fastapi import APIRouter
 from pydantic import BaseModel
 
@@ -14,3 +14,7 @@ router = APIRouter()
 def extract(request: ExtractRequest):
     markdown = extract_and_save_startup_data(request.url)
     return ExtractResponse(markdown=markdown)
+
+@router.post("/scrape")
+def scrape():
+    scrape_sources()
