@@ -1,21 +1,22 @@
 # Aboutme: Scrapes startup urls from different sources
 import re
-from langfuse import observe
+from langfuse import observe, propagate_attributes
 from api.v1.data_access import supabase, firecrawl
 from api.v1.services import extract_and_save_startup_data
 
 # Get chunk of new company data from multiple sources
 @observe(name="scrape_sources")
 def scrape_sources():
-    urls = []
-    # Scrape YC
-    urls.extend(scrape_yc())
+    with propagate_attributes(trace_name="scrape_sources"):
+        urls = []
+        # Scrape YC
+        urls.extend(scrape_yc())
 
-    # Deduplicate the urls
-    new_urls = dedupe(urls)
+        # Deduplicate the urls
+        new_urls = dedupe(urls)
 
-    for url in new_urls:
-        extract_and_save_startup_data(url)
+        for url in new_urls:
+            extract_and_save_startup_data(url)
 
 
 # Ensure only new urls are scraped (save firecrawl credits)
@@ -30,12 +31,14 @@ def dedupe(urls: list[str]) -> list[str]:
     return result
 
 # Scrape links of YC companies (default is Winter 2026)
+@observe()
 def scrape_yc(batch: str = "Winter%202026") -> list[str]:
-    url = f"https://www.ycombinator.com/companies?batch={batch}"
+    with propagate_attributes(trace_name="scrape_yc"):
+        url = f"https://www.ycombinator.com/companies?batch={batch}"
 
-    markdown = firecrawl.scrape(url)
+        markdown = firecrawl.scrape(url)
 
-    # Extract YC company page URLs from markdown links
-    links = re.findall(r'\[.*?\]\((https://www\.ycombinator\.com/companies/[^)]+)\)', markdown)
+        # Extract YC company page URLs from markdown links
+        links = re.findall(r'\[.*?\]\((https://www\.ycombinator\.com/companies/[^)]+)\)', markdown)
 
-    return links
+        return links

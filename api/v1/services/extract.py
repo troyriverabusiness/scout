@@ -3,17 +3,18 @@ from api.v1.data_access import firecrawl, supabase, openai, langfuse
 
 @observe(name="extract_and_save_startup_data")
 def extract_and_save_startup_data(url: str):
-    with propagate_attributes(trace_name="extract_and_save_startup_data"):
-        markdown = firecrawl.scrape(url)
+    # Scrape for raw Markdown
+    markdown = firecrawl.scrape(url)
 
-        data = openai.extract_startup_data(markdown)
+    # Extract structured startup data
+    data = openai.extract_startup_data(markdown)
 
-        # Calculate trace scores
-        langfuse.create_scores(data)
+    # Calculate trace scores for completeness
+    langfuse.create_scores(data)
 
-        supabase.insert_startup_data(url, markdown, data)
+    supabase.insert_startup_data(url, markdown, data)
 
-        return markdown
+    return markdown
 
 @observe(name="extract_and_score_startup")
 def _extract_and_score_startup(raw_text: str):
@@ -23,9 +24,8 @@ def _extract_and_score_startup(raw_text: str):
 
 @observe(name="enrich_startup_data")
 async def enrich_startup_data():
-    with propagate_attributes(trace_name="enrich_startup_data"):
-        startups = supabase.get_all_startup_data()
+    startups = supabase.get_all_startup_data()
 
-        for startup in startups:
-            data = _extract_and_score_startup(startup.raw_text)
-            supabase.insert_startup_data(startup.source_url, startup.raw_text, data)
+    for startup in startups:
+        data = _extract_and_score_startup(startup.raw_text)
+        supabase.insert_startup_data(startup.source_url, startup.raw_text, data)
