@@ -1,5 +1,4 @@
 from supabase import create_client, Client
-from langfuse import observe
 from dotenv import load_dotenv
 import os
 from pydantic import BaseModel
@@ -28,7 +27,6 @@ class Startup(BaseModel):
 # ===============================
 # Queries
 # ===============================
-@observe(name="supabase_insert")
 def insert_startup_data(url: str, raw_text: str, data: Startup):
     return supabase.table("startups").upsert(
         {

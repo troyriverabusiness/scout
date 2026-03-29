@@ -11,14 +11,14 @@ class ExtractResponse(BaseModel):
 router = APIRouter()
 
 @router.post("/extract")
-async def extract(request: ExtractRequest):
+def extract(request: ExtractRequest):
     markdown = extract_and_save_startup_data(request.url)
     return ExtractResponse(markdown=markdown)
 
 @router.post("/scrape")
-async def scrape():
+def scrape():
     scrape_sources()
 
 @router.post("/enrich")
-async def enrich():
-    await enrich_startup_data()
+def enrich():
+    enrich_startup_data()
