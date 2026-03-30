@@ -22,6 +22,7 @@ class Startup(BaseModel):
     stage: str | None = None
     founders: list[str] | None = None
     traction_signals: list[str] | None = None
+    embedding: list[float] | None = None
     created_at: str | None = None
 
 # ===============================
@@ -40,12 +41,13 @@ def insert_startup_data(url: str, raw_text: str, data: Startup):
             "stage": data.stage,
             "founders": data.founders,
             "traction_signals": data.traction_signals,
+            "embedding": data.embedding,
         },
         on_conflict="source_url"
     ).execute()
 
 def get_all_startup_urls() -> list[str]:
-    result = supabase.table("startups").select("source_url").execute()
+    result = supabase.table("startups").select("source_url").order("created_at", desc=True).execute()
     return [row["source_url"] for row in result.data]
 
 def get_all_startup_data() -> list[Startup]:
