@@ -10,7 +10,7 @@ import faiss
 def get_embeddings(startup: Startup, faiss_index: faiss.Index, metadata: list[str]):
     startup_embedding = get_startup_embedding(startup)
     
-    best_fit_name, score = rank_startup_against_funds(faiss_index, metadata, startup)
+    best_fit_name, score = rank_startup_against_funds(faiss_index, metadata, startup_embedding)
     return startup_embedding, best_fit_name, score
 
 
@@ -21,7 +21,8 @@ def get_startup_embedding(startup: Startup) -> list[float]:
 
 @observe(name="rank_startup_against_funds")
 def rank_startup_against_funds(faiss_index: faiss.Index, metadata: list[str], startup_embedding: list[float]):
-    distances, indices = faiss_index.search(startup_embedding, 1)
+    query = np.array([startup_embedding], dtype=np.float32)
+    distances, indices = faiss_index.search(query, 1)
     best_fit = metadata[indices[0][0]]
     score = float(distances[0][0])
     return best_fit, score
