@@ -20,9 +20,8 @@ def get_startup_embedding(startup: Startup) -> list[float]:
 
 
 @observe(name="rank_startup_against_funds")
-def rank_startup_against_funds(faiss_index: faiss.Index, metadata: list[str], startup: Startup):
-    search_embedding = np.array(embeddings.create_embedding(startup_to_text(startup)), dtype=np.float32).reshape(1, -1)
-    distances, indices = faiss_index.search(search_embedding, 1)
+def rank_startup_against_funds(faiss_index: faiss.Index, metadata: list[str], startup_embedding: list[float]):
+    distances, indices = faiss_index.search(startup_embedding, 1)
     best_fit = metadata[indices[0][0]]
     score = float(distances[0][0])
     return best_fit, score
@@ -41,7 +40,17 @@ def create_startups_index() -> tuple[faiss.Index, list[Startup]]:
     return faiss_index, startups
 
 
-def create_funds_index() -> tuple[faiss.Index, list[str]]:
+def get_or_create_funds_index() -> tuple[faiss.Index, list[str]]:
+    # TODO: once funds are stored in Supabase, invalidate the local cache when
+    # the funds table changes (e.g. version hash or last-updated timestamp check)
+    # so the index is rebuilt automatically instead of always loading stale data.
+    try:
+        return index.load_index("funds")
+    except Exception:
+        return _build_funds_index()
+
+
+def _build_funds_index() -> tuple[faiss.Index, list[str]]:
     funds = get_fund_memos()
     vectors = [embeddings.create_embedding(fund["memo"]) for fund in funds]
     names = [fund["name"] for fund in funds]
