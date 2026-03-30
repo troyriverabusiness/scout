@@ -23,6 +23,8 @@ class Startup(BaseModel):
     founders: list[str] | None = None
     traction_signals: list[str] | None = None
     embedding: list[float] | None = None
+    best_fitting_vc: str | None = None
+    confidence: float | None = None
     created_at: str | None = None
 
 # ===============================
@@ -42,6 +44,8 @@ def insert_startup_data(url: str, raw_text: str, data: Startup):
             "founders": data.founders,
             "traction_signals": data.traction_signals,
             "embedding": data.embedding,
+            "best_fitting_vc": data.best_fitting_vc,
+            "confidence": data.confidence,
         },
         on_conflict="source_url"
     ).execute()
@@ -53,3 +57,8 @@ def get_all_startup_urls() -> list[str]:
 def get_all_startup_data() -> list[Startup]:
     result = supabase.table("startups").select("*").execute()
     return [Startup(**row) for row in result.data]
+
+def update_startup_vc_match(startup_id: str, vc_name: str, confidence: float):
+    return supabase.table("startups").update(
+        {"best_fitting_vc": vc_name, "confidence": confidence}
+    ).eq("id", startup_id).execute()

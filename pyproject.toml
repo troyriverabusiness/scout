@@ -15,6 +15,5 @@ dependencies = [
     "numpy>=2.4.3",
     "openai>=2.30.0",
     "pydantic>=2.12.5",
-    "sentence-transformers",
     "supabase>=2.28.3",
 ]
