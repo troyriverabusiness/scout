@@ -62,3 +62,7 @@ def update_startup_vc_match(startup_id: str, vc_name: str, confidence: float):
     return supabase.table("startups").update(
         {"best_fitting_vc": vc_name, "confidence": confidence}
     ).eq("id", startup_id).execute()
+
+def get_startup_data(id: str) -> Startup:
+    result = supabase.table("startups").select("*").eq("id", id).execute()
+    return Startup(**result.data[0])

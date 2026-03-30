@@ -18,16 +18,16 @@ def get_embeddings(startup: Startup, faiss_index: faiss.Index, metadata: list[st
 def get_startup_embedding(startup: Startup) -> list[float]:
     return embeddings.create_embedding(startup_to_text(startup))
 
-
+# TODO: adapt to return all scores for all funds 
 @observe(name="rank_startup_against_funds")
 def rank_startup_against_funds(faiss_index: faiss.Index, metadata: list[str], startup_embedding: list[float]):
     query = np.array([startup_embedding], dtype=np.float32)
     distances, indices = faiss_index.search(query, 1)
     best_fit = metadata[indices[0][0]]
-    score = float(distances[0][0])
-    return best_fit, score
+    best_fit_score = float(distances[0][0])
+    return best_fit, best_fit_score
 
-# Flatten startup data to text for embedding
+# Flattens startup data to text for embedding
 def startup_to_text(startup: Startup) -> str:
     tags = " ".join(startup.traction_signals or [])
     return f"{startup.name} {startup.description} {startup.sector} {tags}"
