@@ -120,3 +120,6 @@ typings/
 
 # Other
 *.sqlite3
+
+
+data/

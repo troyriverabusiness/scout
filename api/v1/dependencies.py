@@ -1,6 +1,7 @@
 from fastapi import Request
-from sentence_transformers import SentenceTransformer
+import faiss
 
 
-def get_model(request: Request) -> SentenceTransformer:
-    return request.app.state.model
+# TODO: add a get_funds_index() dependency here if routes need direct access to the FAISS index
+def get_funds_index(request: Request) -> tuple[faiss.Index, list[str]]:
+    return request.app.state.funds_index, request.app.state.funds_metadata

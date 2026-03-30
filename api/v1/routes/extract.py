@@ -1,7 +1,5 @@
 from api.v1.services import extract_and_save_startup_data, batch_scrape_companies
-from api.v1.dependencies import get_model
-from fastapi import APIRouter, Depends
-from sentence_transformers import SentenceTransformer
+from fastapi import APIRouter
 from pydantic import BaseModel
 
 class ExtractRequest(BaseModel):
@@ -13,8 +11,8 @@ class ExtractResponse(BaseModel):
 router = APIRouter()
 
 @router.post("/extract")
-def extract(request: ExtractRequest, model: SentenceTransformer = Depends(get_model)):
-    markdown = extract_and_save_startup_data(request.url, model)
+def extract(request: ExtractRequest):
+    markdown = extract_and_save_startup_data(request.url)
     return ExtractResponse(markdown=markdown)
 
 @router.post("/scrape")

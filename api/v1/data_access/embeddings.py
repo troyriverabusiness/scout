@@ -8,5 +8,5 @@ def load_model() -> SentenceTransformer:
 
 
 def create_embedding(model: SentenceTransformer, text: str) -> list[float]:
-    return model.encode(text)
+    return model.encode(text).tolist()
 
