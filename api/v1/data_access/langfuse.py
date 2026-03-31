@@ -2,7 +2,7 @@ from langfuse import get_client
 from api.v1.data_access.supabase import Startup
 
 
-EXTRACT_STARTUP_PROMPT_NAME = "extract_startup"
+EXTRACT_STARTUP_PROMPT_NAME = "extract-startup"
 EXTRACT_LINK_PROMPT_NAME = "extract-links"
 
 # ===============================
@@ -33,8 +33,8 @@ def calculate_extracted_fields_score(data: Startup) -> float:
 
 def get_startup_extraction_prompt(markdown: str):
     prompt = get_client().get_prompt(name=EXTRACT_STARTUP_PROMPT_NAME)
-    return prompt.compile(markdown=markdown)
+    return prompt.compile(markdown=markdown), prompt
 
 def get_link_extraction_prompt(markdown: str):
     prompt = get_client().get_prompt(name=EXTRACT_LINK_PROMPT_NAME)
-    return prompt.compile(markdown=markdown)
+    return prompt.compile(markdown=markdown), prompt

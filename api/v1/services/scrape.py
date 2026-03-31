@@ -7,20 +7,22 @@ from api.v1.data_access import supabase, firecrawl, openai
 
 @observe(name="batch_scrape_companies")
 def batch_scrape_companies():
-    # list[str]
+    new_links = get_new_company_links()
+
+    # Scrape new links, extract and save startup data
+    for link in new_links:
+        extract_and_save_startup_data(link)
+
+def get_new_company_links() -> list[str]:
+    # Get existing urls (from Supabase)
     existing_urls = supabase.get_all_startup_urls()
 
-    # list[str]
+    # Scrape YC companies
     yc_companies = scrape_yc()
     yc_links = [company.url for company in yc_companies]
 
     # Filter out existing urls - list[str]
     new_links = dedupe(yc_links, existing_urls)
-
-    # Scrape new links, extract and save startup data
-    for link in new_links:
-        extract_and_save_startup_data(link)
-    
 
 def dedupe(urls: list[str], existing_urls: list[str]) -> list[str]:
     seen = set()
