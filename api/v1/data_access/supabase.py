@@ -27,6 +27,12 @@ class Startup(BaseModel):
     confidence: float | None = None
     created_at: str | None = None
 
+
+class CompanyLink(BaseModel):
+    name: str
+    url: str
+
+
 # ===============================
 # Queries
 # ===============================

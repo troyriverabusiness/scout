@@ -1,28 +1,27 @@
 # Aboutme: Scrapes startup urls from different sources
 import re
+from api.v1.services.extract import extract_and_save_startup_data
 from langfuse import observe
-from api.v1.data_access import supabase, firecrawl
-from api.v1.services import extract_and_save_startup_data
+from api.v1.data_access import supabase, firecrawl, openai
+
 
 @observe(name="batch_scrape_companies")
 def batch_scrape_companies():
-    urls = get_new_company_urls()
-
-    for url in urls:
-        extract_and_save_startup_data(url)
-
-def get_new_company_urls() -> list[str]:
+    # list[str]
     existing_urls = supabase.get_all_startup_urls()
-    urls = []
 
-    # Scrape sources
-    yc_urls = scrape_yc()
-    urls.extend(yc_urls)
+    # list[str]
+    yc_companies = scrape_yc()
+    yc_links = [company.url for company in yc_companies]
 
-    new_urls = dedupe(urls, existing_urls)
-    return new_urls
+    # Filter out existing urls - list[str]
+    new_links = dedupe(yc_links, existing_urls)
 
-# Ensure only new urls are scraped (save firecrawl credits)
+    # Scrape new links, extract and save startup data
+    for link in new_links:
+        extract_and_save_startup_data(link)
+    
+
 def dedupe(urls: list[str], existing_urls: list[str]) -> list[str]:
     seen = set()
     result = []
@@ -33,12 +32,12 @@ def dedupe(urls: list[str], existing_urls: list[str]) -> list[str]:
     return result
 
 # Scrape links of YC companies (default is Winter 2026)
-def scrape_yc(batch: str = "Winter%202026") -> list[str]:
+def scrape_yc(batch: str = "Winter%202026") -> list[supabase.CompanyLink]:
     url = f"https://www.ycombinator.com/companies?batch={batch}"
 
     markdown = firecrawl.scrape(url)
 
-    # Extract YC company page URLs from markdown links
-    links = re.findall(r'\[.*?\]\((https://www\.ycombinator\.com/companies/[^)]+)\)', markdown)
+    # Extract links using LLM
+    links = openai.extract_links(markdown)
 
     return links
