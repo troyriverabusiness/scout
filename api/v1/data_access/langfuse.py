@@ -5,6 +5,9 @@ from api.v1.data_access.supabase import Startup
 EXTRACT_STARTUP_PROMPT_NAME = "extract-startup"
 EXTRACT_LINK_PROMPT_NAME = "extract-links"
 
+OUTREACH_FOUNDER_PROMPT_NAME = "outreach-founder"
+OUTREACH_VC_PROMPT_NAME = "outreach-vc"
+
 # ===============================
 # Functions 
 # ===============================
@@ -30,6 +33,10 @@ def calculate_extracted_fields_score(data: Startup) -> float:
 
     filled = sum(1 for f in fields if f and f != [] and f != "")
     return round(filled / len(fields), 2)
+
+def get_outreach_prompt(name: str):
+    prompt = get_client().get_prompt(name=name)
+    return prompt.compile(), prompt
 
 def get_startup_extraction_prompt(markdown: str):
     prompt = get_client().get_prompt(name=EXTRACT_STARTUP_PROMPT_NAME)

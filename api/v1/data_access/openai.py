@@ -39,3 +39,15 @@ def extract_links(markdown: str) -> list[CompanyLink]:
         ],
         langfuse_prompt=prompt,
     )
+
+
+def create_message(system_prompt: str, langfuse_prompt_ref, startup_text: str) -> str:
+    response = client.chat.completions.create(
+        model="gpt-4o-mini",
+        messages=[
+            {"role": "system", "content": system_prompt},
+            {"role": "user", "content": startup_text},
+        ],
+        langfuse_prompt=langfuse_prompt_ref,
+    )
+    return response.choices[0].message.content
