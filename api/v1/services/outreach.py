@@ -24,8 +24,11 @@ def generate_vc_outreach(startup: Startup) -> str:
 
 def startup_to_text(startup: Startup) -> str:
     return f"""Company: {startup.name}
-One-liner: {startup.one_liner}
+Description: {startup.description}
+Founded: {startup.founded}
+Location: {startup.location}
+Sector: {startup.sector}
+Stage: {startup.stage}
 Founders: {startup.founders}
 Traction: {startup.traction_signals}
-Description: {startup.description}
 """

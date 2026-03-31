@@ -5,8 +5,8 @@ from api.v1.data_access.supabase import Startup
 EXTRACT_STARTUP_PROMPT_NAME = "extract-startup"
 EXTRACT_LINK_PROMPT_NAME = "extract-links"
 
-OUTREACH_FOUNDER_PROMPT_NAME = "outreach-founder"
-OUTREACH_VC_PROMPT_NAME = "outreach-vc"
+OUTREACH_FOUNDER_PROMPT_NAME = "outbound-founder"
+OUTREACH_VC_PROMPT_NAME = "outbound-vc"
 
 # ===============================
 # Functions 

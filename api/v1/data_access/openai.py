@@ -8,7 +8,8 @@ import instructor
 from api.v1.data_access.supabase import Startup, CompanyLink
 from api.v1.data_access.langfuse import get_link_extraction_prompt, get_startup_extraction_prompt
 
-client = instructor.from_openai(openai.OpenAI(api_key=os.getenv("OPENAI_API_KEY")))
+raw_client = openai.OpenAI(api_key=os.getenv("OPENAI_API_KEY"))
+client = instructor.from_openai(raw_client)
 
 # Uses langfuse versioned prompts
 def extract_startup_data(markdown: str) -> Startup:
@@ -42,7 +43,7 @@ def extract_links(markdown: str) -> list[CompanyLink]:
 
 
 def create_message(system_prompt: str, langfuse_prompt_ref, startup_text: str) -> str:
-    response = client.chat.completions.create(
+    response = raw_client.chat.completions.create(
         model="gpt-4o-mini",
         messages=[
             {"role": "system", "content": system_prompt},
